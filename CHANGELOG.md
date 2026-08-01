@@ -39,6 +39,11 @@ First release.
   or network access.
 - `Scripts/sign.sh` and `Resources/touchseal.entitlements` for signing with an
   Apple-issued identity.
+- `Scripts/scrub-history.sh`, a companion utility that finds and removes
+  Anthropic API keys from shell history. It matches per history entry so
+  multi-line commands survive, backs up anything it modifies at mode 0600, and
+  never prints an unmasked key.
+- Bilingual documentation: `README.md` and `README.zh-CN.md`, cross-linked.
 - Documentation of measured macOS code-signing behaviour, the threat model, and
   Claude Code integration including its credential caching.
 

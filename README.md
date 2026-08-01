@@ -443,6 +443,36 @@ correspond to one API request.
 
 ---
 
+## Shell history
+
+Sealing a key does nothing about copies your shell already recorded. A key that
+was ever pasted into a command line is sitting in `~/.zsh_history` in plaintext,
+and TouchSeal cannot reach it.
+
+```bash
+./Scripts/scrub-history.sh              # dry run: report matches, keys masked
+./Scripts/scrub-history.sh --clean      # delete matching entries
+./Scripts/scrub-history.sh --clean --redact   # keep entries, mask the key
+```
+
+It scans `$HISTFILE`, `~/.zsh_sessions/*.history`, and `~/.bash_history`, matches
+per history entry rather than per line so multi-line commands survive intact, and
+backs up every file it modifies to `<file>.bak.<timestamp>` at mode 0600. It
+never prints an unmasked key and sends nothing anywhere.
+
+A dry run exits 1 when it finds something, so it composes in a pre-commit hook or
+a periodic check.
+
+Two things the script cannot do for you: the key was on disk in plaintext, so
+**rotate it**; and other open shells will write their in-memory history back on
+exit, so close them or run `unset HISTFILE; exec zsh` in each.
+
+Once a key is sealed, `touchseal set` keeps it out of history in the first place
+— input is read from the terminal with echo disabled, and a secret is never
+accepted as a command-line argument.
+
+---
+
 ## Limitations
 
 ### No GUI session

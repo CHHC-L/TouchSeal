@@ -415,6 +415,33 @@ Claude Code 可能完全不会调用 TouchSeal。因此，一次 Touch ID 验证
 
 ---
 
+## Shell 历史记录
+
+封存 key 并不能处理你的 shell 早已记录下来的副本。任何曾经粘贴到命令行里的
+key，此刻正以明文形式躺在 `~/.zsh_history` 中，而 TouchSeal 够不到它。
+
+```bash
+./Scripts/scrub-history.sh              # 试运行：报告匹配项，key 会被遮蔽
+./Scripts/scrub-history.sh --clean      # 删除匹配的条目
+./Scripts/scrub-history.sh --clean --redact   # 保留条目，仅遮蔽 key
+```
+
+它会扫描 `$HISTFILE`、`~/.zsh_sessions/*.history` 和 `~/.bash_history`；
+按历史**条目**而不是按行匹配，因此多行命令能完整保留；并把每个被修改的文件
+备份到 `<file>.bak.<时间戳>`（权限 0600）。它绝不输出未遮蔽的 key，
+也不会把任何内容发送到任何地方。
+
+试运行在发现匹配时退出码为 1，因此可以直接用在 pre-commit 钩子或定期检查中。
+
+有两件事脚本无法替你完成：key 曾以明文落盘，所以**请轮换它**；另外其他仍打开的
+shell 会在退出时把内存中的历史写回，所以请关闭它们，或在每个 shell 中执行
+`unset HISTFILE; exec zsh`。
+
+而一旦 key 被封存，`touchseal set` 从一开始就不会让它进入历史记录 ——
+输入从终端读取且关闭回显，秘密也绝不接受作为命令行参数传入。
+
+---
+
 ## 限制
 
 ### 没有 GUI 会话时不可用

@@ -10,4 +10,6 @@ Package.resolved
 
 # Local working files kept in this directory but not published
 doc.md
-scrub-anthropic-keys.sh
+
+# Backups written by Scripts/scrub-history.sh
+*.bak.[0-9]*
