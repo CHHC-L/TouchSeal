@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: macos-15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          sw_vers
+          swift --version
+
+      - name: Build (debug)
+        run: swift build
+
+      - name: Test
+        # The runner has full Xcode, so this falls through to `swift test`.
+        # No test touches the Keychain, Touch ID, or the network — CI has none
+        # of them, and no code-signing identity either.
+        run: ./Scripts/test.sh
+
+      - name: Build (release)
+        run: swift build -c release
+
+      - name: Check the tool runs without a Keychain or Touch ID
+        run: |
+          set -eu
+          touchseal=.build/release/touchseal
+
+          # Commands that must work anywhere.
+          "$touchseal" version
+          "$touchseal" help > /dev/null
+
+          # Argument errors must use the documented exit code and leave stdout
+          # empty, so nothing can be mistaken for a released secret.
+          check() {
+            expected="$1"; shift
+            code=0
+            out="$("$touchseal" "$@" 2>/dev/null)" || code=$?
+            if [ "$code" -ne "$expected" ]; then
+              echo "expected exit $expected from '$*', got $code" >&2
+              exit 1
+            fi
+            if [ -n "$out" ]; then
+              echo "expected empty stdout from '$*', got: $out" >&2
+              exit 1
+            fi
+          }
+
+          check 2 frobnicate
+          check 2 --nope
+          check 2 get
+          check 2 get a b
+          check 2 get ""
+          check 2 get " leading"
+          check 2 delete some-name --force
+          # A name that cannot exist: absent, and silent about it.
+          check 3 exists touchseal-ci-absent-name
+
+      - name: Check for accidental network use
+        run: |
+          set -eu
+          # TouchSeal must make no network requests. Nothing should import a
+          # networking API.
+          if grep -rnE 'URLSession|Network\.framework|import Network|CFSocket|getaddrinfo' Sources/; then
+            echo "networking API found in Sources/" >&2
+            exit 1
+          fi
+
+      - name: Check for third-party dependencies
+        run: |
+          set -eu
+          if grep -n 'dependencies: *\[[^]]' Package.swift | grep -v 'targets:'; then
+            echo "review Package.swift: v0.1 must have no third-party dependencies" >&2
+          fi
+          test ! -f Package.resolved || {
+            echo "Package.resolved present; TouchSeal must have no dependencies" >&2
+            exit 1
+          }

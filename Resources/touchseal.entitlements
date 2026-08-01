@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  Required for Touch ID-protected Keychain items.
+
+	  macOS only permits kSecAttrAccessControl (and the data protection
+	  Keychain generally) for binaries whose code signature carries a keychain
+	  access group. Without it, SecItemAdd fails with errSecMissingEntitlement
+	  (-34018). See "Code signing" in README.md.
+
+	  Replace TEAMID below with your Apple Developer Team ID. The prefix must
+	  match the team of the signing identity, or macOS ignores the entitlement.
+
+	  Ad-hoc signatures (codesign --sign -) cannot carry this entitlement: the
+	  system terminates the process on launch.
+	-->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>TEAMID.io.github.chhc-l.touchseal</string>
+	</array>
+</dict>
+</plist>

@@ -1,0 +1,15 @@
+#!/bin/sh
+# Claude Code apiKeyHelper for TouchSeal.
+#
+# Install:
+#   install -m 700 Examples/claude-anthropic-key "$HOME/.local/bin/claude-anthropic-key"
+#
+# Then in your Claude Code settings:
+#   { "apiKeyHelper": "/Users/USERNAME/.local/bin/claude-anthropic-key" }
+#
+# This script deliberately does nothing but exec TouchSeal. Do not export the
+# key, write it to a file, echo it back, or add debug output: anything beyond
+# the exec risks leaking the secret or corrupting what Claude Code reads.
+set -eu
+
+exec "$HOME/.local/bin/touchseal" get anthropic-api-key

@@ -1,0 +1,48 @@
+name: Feature request
+description: Suggest a change to TouchSeal.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never paste API keys, passwords, Keychain contents, or other secrets
+        into an issue.**
+
+        Please read the "Things that will not be merged" section of
+        [CONTRIBUTING.md](https://github.com/CHHC-L/TouchSeal/blob/main/CONTRIBUTING.md)
+        first. Proposals that weaken the security model — password fallback,
+        skipping authentication, caching approvals, listing secret names — are
+        deliberate omissions rather than gaps.
+
+  - type: checkboxes
+    id: no-secrets
+    attributes:
+      label: Secret check
+      options:
+        - label: I have confirmed this request contains no real secrets.
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the situation you are in, not just the feature you want.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: security
+    attributes:
+      label: Security implications
+      description: >-
+        How would this affect the guarantee that a secret is released only after
+        a fresh Touch ID approval?
+    validations:
+      required: true
